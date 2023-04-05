@@ -1,9 +1,9 @@
-NAME =app1
+NAME =App1
 SRC =main.cpp PhoneBook.cpp Contact.cpp GetLine.cpp ProString.cpp
 OBJ =$(SRC:.cpp=.o)
 INCLUDES =PhoneBook.hpp Contact.hpp GetLine.hpp ProString.hpp
 CC =g++
-CFLAGS =-Wall -Wextra -Werror
+CFLAGS =-Wall -Wextra -Werror -std=c++98
 RM =rm -f
 
 all: $(NAME)
