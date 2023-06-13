@@ -5,7 +5,6 @@
 #include <iostream>
 #include <iomanip>
 #include "Contact.hpp"
-#include "ProString.hpp"
 
 class GetLine
 {

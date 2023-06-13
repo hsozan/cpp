@@ -9,6 +9,16 @@ PhoneBook::~PhoneBook()
 {
 }
 
+std::string PhoneBook::cutLettersToTen(const std::string str)
+{
+    std::string temp;
+
+    if (str.length() > 10)
+        temp = str.substr(0, 9) + ".";
+    else
+        temp = str;
+    return (temp);
+}
 void PhoneBook::setContactList(Contact contact, int index)
 {
     if (contact.getName().length() > 0)
@@ -41,11 +51,11 @@ void PhoneBook::print(void)
     while (++i < this->contactCount)
     {
         std::cout <<
-        std::setw(10) << proString.cutLettersToTen(contactList[i].getName()) << "|" << 
-        std::setw(10) << proString.cutLettersToTen(contactList[i].getSurName()) << "|" << 
-        std::setw(10) << proString.cutLettersToTen(contactList[i].getNickName()) << "|" << 
-        std::setw(10) << proString.cutLettersToTen(contactList[i].getPhone()) << "|" << 
-        std::setw(10) << proString.cutLettersToTen(contactList[i].getDarketSecret()) << "|" << std::endl;
+        std::setw(10) << cutLettersToTen(contactList[i].getName()) << "|" << 
+        std::setw(10) << cutLettersToTen(contactList[i].getSurName()) << "|" << 
+        std::setw(10) << cutLettersToTen(contactList[i].getNickName()) << "|" << 
+        std::setw(10) << cutLettersToTen(contactList[i].getPhone()) << "|" << 
+        std::setw(10) << cutLettersToTen(contactList[i].getDarketSecret()) << "|" << std::endl;
     }
 }
 

@@ -1,28 +1,18 @@
 #include <iostream>
 
-using namespace std;
-
-string ft_strupcase(string str) {
-    for(int i = 0; str[i]; i++) {
-        str[i]= toupper(str[i]);
-    }
+std::string ft_strupcase(std::string str) {
+    for(int i = 0; i < (int)str.length(); i++)
+        str[i] = toupper(str[i]);
     return str;
 }
 
-int main(int argc, char **argv) {
-    int i = 1;
-    if(argc == 1) {
-        cout << "* LOUD AND UNBEARABLE FEEDBACK NOISE *" << endl;
-        return 0;
-    }
-    else if(argc >= 2) {
-        while(argv[i] && i < argc) {
-            cout << ft_strupcase(argv[i]);
-            i++;
-        }
-        cout << endl;
+int main(int c, char **a) {
+    if(c == 1)
+        std::cout << "* LOUD AND UNBEARABLE FEEDBACK NOISE *" << std::endl;
+    else if(c >= 2) {
+        for(int i = 1; i < c; i++) 
+            std::cout << ft_strupcase(a[i]);
+        std::cout << std::endl;
         }
         return 0;
-
-    return 0;
 }

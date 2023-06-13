@@ -1,7 +1,7 @@
 NAME =App1
-SRC =main.cpp PhoneBook.cpp Contact.cpp GetLine.cpp ProString.cpp
+SRC =main.cpp PhoneBook.cpp Contact.cpp GetLine.cpp 
 OBJ =$(SRC:.cpp=.o)
-INCLUDES =PhoneBook.hpp Contact.hpp GetLine.hpp ProString.hpp
+INCLUDES =PhoneBook.hpp Contact.hpp GetLine.hpp 
 CC =g++
 CFLAGS =-Wall -Wextra -Werror -std=c++98
 RM =rm -f
