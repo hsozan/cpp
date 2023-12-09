@@ -1,5 +1,5 @@
-NAME = Convert
-SRC = Base.cpp main.cpp
+NAME = Iter
+SRC = main.cpp
 OBJ = $(SRC:.cpp=.o)
 
 all: $(NAME)

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "whatever.hpp"
+#include "Whatever.hpp"
 
 int	main( void )
 {
@@ -12,8 +12,8 @@ int	main( void )
 	float		f2 = -475.14f;
 
 	// STRING
-	std::string	s1 = "Bonjour";
-	std::string	s2 = "Au revoir";
+	std::string	s1 = "Hello";
+	std::string	s2 = "World!";
 
 	// CHAR
 	char		c1 = 'a';
