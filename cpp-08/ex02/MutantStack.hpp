@@ -35,7 +35,14 @@ class MutantStack : public std::stack<T>
 				this->push(v[n]);
 			return (ret);
 		}
-		iterator end() { return (&this->top() + 1); }
+		//begin() returns an iterator to the top of the stack
+		//but it also reverses the stack
+		//so that the top of the stack is the first element of the vector
+		//and the bottom of the stack is the last element of the vector
+		//so that the iterator can be used to iterate through the stack
+		//from top to bottom
+	
+		iterator end() { return (&this->top() + 1); }//we add 1 to the address of the top of the stack to get the address of the bottom of the stack
 };
 
 #endif
