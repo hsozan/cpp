@@ -1,29 +1,22 @@
-#ifndef BITCOINEXCHANGE_H
-#define BITCOINEXCHANGE_H
+#ifndef BITCOINEXCHANGE_HPP
+# define BITCOINEXCHANGE_HPP
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <exception>
 #include <map>
 #include "Colour.hpp"
 
+#define MAX	2147483647
 
-
-class BitcoinExchange
-{
-    private:
-        std::map<std::string , float> _database;
-    public:
-        BitcoinExchange ();
-        BitcoinExchange (const BitcoinExchange &a);
-        ~BitcoinExchange ();
-        BitcoinExchange & operator = (const BitcoinExchange &a);
-
-        void    ReadBase(void);
-        void    PrintMap(std::map<std::string, float> mymap);
-        void    ReadInput(std::string file);
-        int     Parsing(int year, int month, int day, std::string raate, float rate, std::string     line);
-        void    PrintOuput(std::string inputdate, float bitcoins);
-};
+double findRate(std::string date, std::map<std::string, double> data);
+void checkInput(char *file, std::map<std::string, double> data);
+std::map<std::string, double> readData();
+void printMap(const std::map<std::string, double>& myMap);
+std::string moveDateBackOneDay(const std::string& date);
+bool ifValidDate(const std::string& date);
+bool ifValidValue(const std::string& value);
 
 #endif

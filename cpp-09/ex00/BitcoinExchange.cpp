@@ -1,174 +1,164 @@
 #include "BitcoinExchange.hpp"
 
-BitcoinExchange::BitcoinExchange ()
-{
-}
-
-/*--------------------------------------------------------*/
-BitcoinExchange::BitcoinExchange (const BitcoinExchange &a)
-{
-	this->operator=(a);
-}
-
-/*--------------------------------------------------------*/
-BitcoinExchange::~BitcoinExchange ()
-{
-}
-
-/*--------------------------------------------------------*/
-BitcoinExchange & BitcoinExchange::operator = (const BitcoinExchange &a)
-{
-	(void)a;
-	return (*this);
-}
-
-void    BitcoinExchange::ReadBase()
-{
-    std::ifstream   input;
-    std::string     database;
-
-    input.open("./data.csv");
-    while (!input.eof())
-    {
-        input >> database;
-        std::string fulldate = database.substr(0,10).erase(4,1).erase(6,1);
-        float      rate = 0.0;
-        std::stringstream convert;
-        convert << database.substr(11);
-        convert >> rate;
-        _database.insert(std::make_pair(fulldate,rate));
+std::map<std::string, double> readData() {
+	std::map<std::string, double> _data;
+	std::ifstream file("data.csv");
+    std::string line;
+    // Skip first line
+    std::getline(file, line);
+    // Read data from file and insert into map
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string date, rate;
+        std::getline(ss, date, ',');
+        std::getline(ss, rate, ',');
+        _data[date] = std::stod(rate);
     }
-    input.close();    
+	return _data;
 }
 
-int BitcoinExchange::Parsing(int year, int month, int day, std::string raate ,float rate, std::string line)
-{
-    size_t idx = line.find("|");
-    if (line[idx + 1] != ' ' || line[idx - 1] != ' ')
-    {
-        std::cerr << "Invalid Pipe\n";
-        return (-1);
+void checkInput(char *file, std::map<std::string, double> data) {
+	// check if file exists
+	std::ifstream inputFile(file);
+    if (!inputFile) {
+        cout << "Error: Failed to open file." << endl;
+        exit(1);
     }
-
-    if (line.substr(4,1) != "-" && line.substr(7,1) != "-")
-    {
-        std::cerr << "Invalid Date Format\n";
-        return (-1);
+	// check the first line
+    std::string firstLine;
+    std::getline(inputFile, firstLine);
+    if (firstLine.compare("date | value")) {
+        cout << "Error: First line of file is not 'date | value'." << endl;
+        exit(1);
     }
+    // Parse the rest
+    std::string line;
+    // std::getline(inputFile, line);
+    while (std::getline(inputFile, line)) {
+        std::istringstream iss(line);
+        std::string date;
+        std::string value;
+        char seperator;
+        if(!(iss >> date >> seperator >> value) || seperator != '|')
+			cout << "Error: bad input => " << date << endl;
+		else if(!ifValidDate(date) || !ifValidValue(value))
+			cout << "Error: bad input => " << date << endl;
+		else if(stod(value) < 0)
+			cout << "Error: not a positive number." << endl;
+		else if(stod(value) > 1000)
+			cout << "Error: too large a number." << endl;
+		else if (stod(value) < 1000 || stod(value) > 0) {
+			double mult = stod(value) * findRate(date, data);
+			cout << date << " => " << value << " = " << mult << endl;
+		}
+		else
+			cout << "Error: bad input => " << date << endl;
+    }
+    
+    inputFile.close();
+}
 
-    int count = 0;
-    for (size_t i = 0; i < raate.length(); i++)
-    {
-        if (raate[0] == '.')
-        {
-            std::cerr << "Invalid Rate Format\n";
-            return (-1);
+double findRate(std::string date, std::map<std::string, double> data) {
+	std::map<std::string, double>::iterator it = data.find(date);
+    if (it != data.end()) {
+        return it->second;
+    } else {
+        std::string previousDay = moveDateBackOneDay(date);
+        if (previousDay.compare("not valid date"))
+            return 0;
+        return findRate(previousDay, data);
+    }
+}
+
+std::string moveDateBackOneDay(const std::string& date) {
+    // Extract the year, month, and day from the input date
+    int year, month, day;
+    sscanf(date.c_str(), "%d-%d-%d", &year, &month, &day);
+    // Compute the date one day earlier
+    int prev_day = day - 1;
+    int prev_month = month;
+    int prev_year = year;
+    if (prev_day == 0) {
+        // If we've gone back to the previous month, set the day to the last day of the previous month
+        prev_month = month - 1;
+        if (prev_month == 0) {
+            prev_month = 12;
+            prev_year = year - 1;
+            if (prev_year < 2009) {
+                return "not valid date";
+            }
         }
-        if (raate[i] == '.')
-            count++;
-        if (!(isdigit(raate[i])) && raate[i] != '.' && (count == 1 || count == 0))
-        {
-            std::cerr << "Invalid Rate Format\n";
-            return (-1);
+        switch (prev_month) {
+            case 2:
+                // Handle leap years for February
+                if (prev_year % 4 == 0 && (prev_year % 100 != 0 || prev_year % 400 == 0)) {
+                    prev_day = 29;
+                } else {
+                    prev_day = 28;
+                }
+                break;
+            case 4:
+            case 6:
+            case 9:
+            case 11:
+                prev_day = 30;
+                break;
+            default:
+                prev_day = 31;
         }
     }
-
-    int month_limits[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    if (year < 2009 || month < 1 || month > 12)
-    {
-        std::cerr << "Invalid Date Format\n";
-        return (-1);
-    }
-    if (day > month_limits[month - 1] || day < 1)
-    {
-        std::cerr << "Out of month range\n";
-        return (-1);
-    }
-    if (rate < 0.00 || rate > 1000.00 )
-    {
-        std::cerr << "Rate out of range\n";
-        return (-1);
-    }
-    return (0);
-}
-
-void    BitcoinExchange::PrintOuput(std::string inputdate, float bitcoins)
-{
-    std::map<std::string, float>::iterator itb = this->_database.begin();
-    std::map<std::string, float>::iterator ite = this->_database.end();
-    bool    flag = false;
-
-    for (; itb != ite; itb++)
-    {
-        if (itb->first == inputdate)
-        {
-            flag = true;
-            break;
-        }
-    }
-    if (flag == true)
-    {
-        std::cout << inputdate.insert(4,"-").insert(7,"-") << " => " << bitcoins << " = " <<  std::fixed << std::setprecision(2) << bitcoins * itb->second << "\n";
-        flag = false;
-    }
+    // Format the previous date as a string and return it
+    std::string prev_date = std::to_string(prev_year) + "-";
+    if (prev_month < 10)
+        prev_date += "0" + std::to_string(prev_month);
     else
-    {
-        ite = this->_database.lower_bound(inputdate);
-        std::cout << inputdate.insert(4,"-").insert(7,"-") << " => " << bitcoins << " = " << std::fixed << std::setprecision(2) << bitcoins * ite->second << "\n";
-    }
+        prev_date += std::to_string(prev_month);
+    if (prev_day < 10)
+        prev_date += "-0" + std::to_string(prev_day);
+    else
+        prev_date += "-" + std::to_string(prev_day);
+    return (prev_date);
 }
 
-void    BitcoinExchange::ReadInput(std::string file)
-{
-    std::ifstream   input;
-    std::string     line;
-
-    input.open(file);
-
-    if (input.fail())
-    {
-        std::cerr << "Cannot Open File\n";
-        input.close();    
-        exit(0);
+bool ifValidDate(const std::string& date) {
+    // Check that the input string has the correct length
+    if (date.length() != 10) {
+        return false;
     }
+    // Check that the Year, Month, and Day components are valid integers
+    int year, month, day;
+    char separator1, separator2;
+    std::istringstream ss(date);
+    ss >> year >> separator1 >> month >> separator2 >> day;
+    if (ss.fail() || separator1 != '-' || separator2 != '-' ||
+        year < 0 || month < 1 || month > 12 || day < 1 || day > 31) {
+        return false;
+    }
+    // Check that the Month and Day components are valid for the given Year
+    bool leap_year = ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
+    if ((month == 2 && (leap_year ? day > 29 : day > 28)) ||
+        ((month == 4 || month == 6 || month == 9 || month == 11) && day > 30))
+        return false;
+    // The input string is a valid date in the Year-Month-Day format
+    return true;
+}
 
-    while (!input.eof())
-    {
-        std::string fulldate;
-        std::getline(input, line);
-
-        int year, month, day = 0;
-        std::stringstream y, m, d;
-        y << line.substr(0,4);
-        m << line.substr(5,2);
-        d << line.substr(8,2);
-        y >> year;
-        m >> month;
-        d >> day;
-
-        if (line.length() < 14)
-        {
-            std::cerr << "Invalid Format\n";
-            continue ;
+bool ifValidValue(const std::string& value) {
+    // Check that the input string has the correct length
+    try {
+            std::stof(value);
         }
-        
-        std::string raate = line.substr(13, line.find('\0'));
+        catch (const std::invalid_argument& e) {
+            cout << e.what() << endl;
+            return false;
+        }
+    return true;
+}
 
-        float   bitcoins = 0.00;
-        std::stringstream bit;
-        bit << raate;
-        bit >> bitcoins;
-
-        if (month < 10 && day < 10)
-            fulldate = std::to_string(year * 10) + std::to_string(month * 10) + std::to_string(day);
-        else if (day < 10)
-            fulldate = std::to_string(year) + std::to_string(month * 10) + std::to_string(day);
-        else if (month < 10)
-            fulldate = std::to_string(year * 10) + std::to_string(month) + std::to_string(day);
-        else
-            fulldate = std::to_string(year) + std::to_string(month) + std::to_string(day);
-
-        if (Parsing(year, month, day, raate, bitcoins, line) == 0)
-            PrintOuput(fulldate, bitcoins);
+void printMap(const std::map<std::string, double>& map) {
+    std::map<std::string, double>::const_iterator it;
+    for (it = map.begin(); it != map.end(); ++it) {
+        cout << it->first << "=" << it->second << " ";
     }
+    cout << endl;
 }

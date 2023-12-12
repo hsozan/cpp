@@ -1,5 +1,5 @@
-#ifndef COLOURS_H
-#define COLOURS_H
+#ifndef COLOUR_H
+#define COLOUR_H
 
 # define RESET "\033[0m"
 # define BLACK "\033[30m"
@@ -18,5 +18,7 @@
 # define BOLDMAGENTA "\033[1m\033[35m"
 # define BOLDCYAN "\033[1m\033[36m"
 # define BOLDWHITE "\033[1m\033[37m"
+# define cout std::cout
+# define endl std::endl
 
 #endif
